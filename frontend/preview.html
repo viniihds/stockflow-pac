@@ -1,0 +1,214 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>StockFlow PAC - Preview</title>
+    <link rel="stylesheet" href="./src/styles.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <aside class="sidebar">
+        <div class="brand">
+          <div class="brand-mark">SF</div>
+          <div>
+            <p class="brand-eyebrow">StockFlow PAC</p>
+            <h1>Gestao de estoque</h1>
+          </div>
+        </div>
+
+        <nav class="nav-list" aria-label="Navegacao principal">
+          <button class="nav-item nav-item-active" type="button">Painel inicial</button>
+          <button class="nav-item" type="button">Produtos</button>
+          <button class="nav-item" type="button">Categorias</button>
+          <button class="nav-item" type="button">Movimentacoes</button>
+          <button class="nav-item" type="button">Financeiro</button>
+          <button class="nav-item" type="button">Relatorios</button>
+        </nav>
+
+        <section class="sidebar-card">
+          <p class="section-label">Status do projeto</p>
+          <h2>Versao inicial</h2>
+          <p>
+            Estrutura visual pronta para o primeiro ciclo. Backend e integracoes ficam para a
+            proxima etapa.
+          </p>
+        </section>
+      </aside>
+
+      <main class="workspace">
+        <header class="topbar">
+          <div>
+            <p class="eyebrow">Painel operacional</p>
+            <h2>Visao geral do estoque</h2>
+          </div>
+
+          <div class="topbar-actions">
+            <label class="search-field">
+              <span class="search-label">Buscar</span>
+              <input type="search" placeholder="Produto, categoria ou pedido" readonly />
+            </label>
+            <button type="button" class="button button-secondary">Exportar</button>
+            <button type="button" class="button button-primary">Novo produto</button>
+          </div>
+        </header>
+
+        <section class="hero-strip">
+          <div>
+            <p class="section-label">Base documental</p>
+            <h3>Controle de produtos, entradas, saidas, prazos e financeiro em uma unica visao.</h3>
+            <p>
+              A primeira entrega prioriza leitura rapida do estado da operacao e deixa a navegacao
+              preparada para o cadastro, o acompanhamento de movimentacoes e os relatorios.
+            </p>
+          </div>
+
+          <div class="hero-meta">
+            <div>
+              <span class="meta-value">24</span>
+              <span class="meta-label">produtos com alerta</span>
+            </div>
+            <div>
+              <span class="meta-value">5</span>
+              <span class="meta-label">entregas aguardadas</span>
+            </div>
+            <div>
+              <span class="meta-value">R$ 128 mil</span>
+              <span class="meta-label">estoque valorizado</span>
+            </div>
+          </div>
+        </section>
+
+        <section class="kpi-grid" aria-label="Indicadores principais">
+          <article class="kpi-card kpi-emerald">
+            <p class="section-label">Produtos cadastrados</p>
+            <strong>248</strong>
+            <span>+18 neste mes</span>
+          </article>
+          <article class="kpi-card kpi-sky">
+            <p class="section-label">Itens em estoque</p>
+            <strong>12.480</strong>
+            <span>Saldo consolidado</span>
+          </article>
+          <article class="kpi-card kpi-amber">
+            <p class="section-label">Alertas criticos</p>
+            <strong>7</strong>
+            <span>Reposicao urgente</span>
+          </article>
+          <article class="kpi-card kpi-rose">
+            <p class="section-label">Margem media</p>
+            <strong>34%</strong>
+            <span>Ultimo fechamento</span>
+          </article>
+        </section>
+
+        <section class="content-grid">
+          <article class="panel panel-wide">
+            <div class="panel-header">
+              <div>
+                <p class="section-label">Movimentacoes recentes</p>
+                <h3>Ultimas operacoes registradas</h3>
+              </div>
+              <span class="panel-note">Mock visual da primeira versao</span>
+            </div>
+
+            <div class="table-scroll">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Produto</th>
+                    <th>Tipo</th>
+                    <th>Quantidade</th>
+                    <th>Responsavel</th>
+                    <th>Data</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>Papel sulfite A4</td>
+                    <td><span class="status-pill status-entry">Entrada</span></td>
+                    <td>+320</td>
+                    <td>Almoxarifado</td>
+                    <td>16/08/2026</td>
+                  </tr>
+                  <tr>
+                    <td>Toner preto</td>
+                    <td><span class="status-pill status-exit">Saida</span></td>
+                    <td>-12</td>
+                    <td>Financeiro</td>
+                    <td>16/08/2026</td>
+                  </tr>
+                  <tr>
+                    <td>Pasta arquivo</td>
+                    <td><span class="status-pill status-entry">Entrada</span></td>
+                    <td>+90</td>
+                    <td>Compras</td>
+                    <td>15/08/2026</td>
+                  </tr>
+                  <tr>
+                    <td>Etiqueta adesiva</td>
+                    <td><span class="status-pill status-exit">Saida</span></td>
+                    <td>-44</td>
+                    <td>Operacao</td>
+                    <td>15/08/2026</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </article>
+
+          <section class="panel panel-rail">
+            <div>
+              <p class="section-label">Alertas de prioridade</p>
+              <h3>Pontos que exigem atencao</h3>
+            </div>
+
+            <ul class="alert-list">
+              <li class="alert-item">
+                <span class="alert-level alert-level-high">Alta prioridade</span>
+                <strong>Estoque minimo atingido</strong>
+                <p>
+                  Toner preto, etiqueta adesiva e caneta marcador precisam de reposicao imediata.
+                </p>
+              </li>
+              <li class="alert-item">
+                <span class="alert-level alert-level-medium">Prioridade media</span>
+                <strong>Entrega aguardada</strong>
+                <p>
+                  Pedido de insumos administrativos segue pendente de confirmacao com o fornecedor.
+                </p>
+              </li>
+              <li class="alert-item">
+                <span class="alert-level alert-level-low">Rotina</span>
+                <strong>Conferencia semanal</strong>
+                <p>A reconciliacao fisica do estoque deve ser feita antes do fechamento mensal.</p>
+              </li>
+            </ul>
+
+            <div>
+              <p class="section-label">Atalhos</p>
+              <div class="shortcut-grid">
+                <div class="shortcut">
+                  <strong>Produtos</strong>
+                  <span>Cadastro e consulta de itens.</span>
+                </div>
+                <div class="shortcut">
+                  <strong>Categorias</strong>
+                  <span>Organizacao por grupos e filtros.</span>
+                </div>
+                <div class="shortcut">
+                  <strong>Movimentacoes</strong>
+                  <span>Entrada, saida e historico.</span>
+                </div>
+                <div class="shortcut">
+                  <strong>Relatorios</strong>
+                  <span>Visao operacional e financeira.</span>
+                </div>
+              </div>
+            </div>
+          </section>
+        </section>
+      </main>
+    </div>
+  </body>
+</html>

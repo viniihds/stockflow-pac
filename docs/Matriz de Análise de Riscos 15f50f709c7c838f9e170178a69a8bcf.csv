@@ -1,0 +1,22 @@
+﻿Risco,Probab. Ocorrência,Impacto se ocorrer,Nível do risco,Estratégia de Resposta,Ações
+"Vazamento de dados sensíveis (credenciais, dados de clientes) por má configuração de acesso",Baixa,Alta,Alta,Evitar risco,"Aplicar princípio do menor privilégio, MFA, segregação de ambientes, gestão de segredos, revisão de permissões e logs de acesso com alertas."
+Precificação incorreta (regras de desconto/impostos),Baixa,Alta,Alta,Evitar risco,"Criar suíte de testes para regras de preço, separar motor de precificação, validar com casos reais, e registrar alterações de tabela de preço com aprovação."
+Falhas no sistema em produção,Média,Alta,Alta,Mitigar risco,"Criar suíte de testes, padronizar código e aprovação para alterações obrigatória. "
+Falha na integração com APIs externas,Baixa,Alta,Média,Evitar risco,"Definir contrato de API e mocks, criar fallback manual para cotação/rastreio, monitorar erros por transportadora e implementar retries/circuit breaker."
+Inconsistência de estoque (divergência entre físico e sistema),Média,Alta,Alta,Mitigar risco,"Implementar auditorias cíclicas, trilha de auditoria de movimentações, validações de entrada/saída, e reconciliação automática com alertas para divergências."
+Desalinhamento de expectativas com stakeholders,Baixa,Média,Baixa,Evitar risco,"Realizar demonstrações periódicas, manter comunicação regular sobre progresso e validar entregas incrementais."
+Perda de dados por falta de backup,Baixa,Alta,Média,Evitar risco,Usar controle de versão (Git).
+Segurança de dados comprometida,Baixa,Alta,Baixa,Evitar risco,"Implementar boas práticas de segurança (criptografia, autenticação, autorização), realizar auditoria de segurança e seguir LGPD."
+Falta de testes adequados,Média,Baixa,Baixa,Mitigar risco,Definir cobertura mínima de testes e incluir testes no processo de code review.
+Complexidade técnica subestimada,Média,Baixa,Baixa,Aceitar risco,Realizar análise técnica inicial detalhada e revisar estimativas regularmente.
+Mudanças frequentes de requisitos,Baixa,Média,Baixa,Evitar risco,"Adotar metodologia ágil com sprints curtos, manter backlog priorizado e estabelecer processo de aprovação para mudanças."
+Escopo mal definido,Baixa,Alta,Média,Evitar risco,"Realizar reuniões de levantamento de requisitos detalhadas, criar documentação de especificação funcional e validar com stakeholders."
+Indisponibilidade de desenvolvedor,Baixa,Alta,Média,Mitigar risco,"Documentar código e processos, garantir conhecimento compartilhado entre os devs, e manter backups de trabalho."
+Falta de padronização de código,Baixa,Média,Média,Evitar risco,"Estabelecer guia de estilo, configurar linters e formatadores automáticos, e implementar code review obrigatório."
+Comunicação remota deficiente,,,,Mitigar risco,"Estabelecer reuniões diárias de 15 minutos, usar ferramentas de comunicação assíncrona (Slack/Discord) e documentar decisões importantes."
+Divergência entre financeiro e estoque (vendas/saídas não conciliadas),Média,Alta,Alta,Mitigar risco,"Implementar conciliação diária automática, regras de integridade (movimentação gera lançamento), relatórios de divergência e trilha de auditoria."
+Relatórios inconsistentes por regras de negócio ambíguas (métricas divergentes),Baixa,Média,Média,Mitigar risco,"Definir dicionário de métricas (fonte de verdade), validar com stakeholders, criar testes de agregação e versionar regras de cálculo."
+Vulnerabilidades em dependências do frontend (npm),Média,Alta,Alta,Evitar risco,"Fixar versões (lockfile), usar Dependabot/Snyk, revisar licenças, rodar auditoria de dependências e aplicar política de atualização periódica."
+Quebra de compatibilidade entre frontend e backend por contrato de API não versionado (React ↔ Spring Boot),Média,Média,Média,Mitigar risco,"Definir contrato (OpenAPI/Swagger), versionar endpoints, usar mocks no frontend, testes de contrato e pipeline bloqueando mudanças breaking sem revisão."
+Migrações e mudanças de schema no PostgreSQL causando indisponibilidade ou perda de dados,Baixa,Alta,Alta,Mitigar risco,"Adotar ferramenta de migração (Flyway/Liquibase), revisar migrações, rodar em staging, backups antes de deploy, migrações compatíveis (expand/contract) e janelas/feature flags quando necessário."
+Vazamento de segredos em repositório ou pipeline (GitHub/GitHub Actions),Média,Alta,Alta,Evitar risco,"Usar GitHub Secrets/OIDC, bloquear commits com credenciais (secret scanning), revisar permissões do repo, rotação de chaves, e nunca logar variáveis sensíveis no CI."
