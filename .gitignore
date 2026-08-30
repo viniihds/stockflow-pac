@@ -14,3 +14,9 @@ frontend/.vite/
 # Backend
 backend/target/
 
+# Environment files (do not commit secrets)
+.env
+**/.env
+backend/.env
+docker/postgres/.env
+
