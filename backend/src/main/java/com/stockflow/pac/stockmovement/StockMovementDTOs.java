@@ -25,15 +25,15 @@ public class StockMovementDTOs {
             String reason,
             Instant movementDate
     ) {
-        public static Response fromEntity(StockMovement m) {
+        public static Response fromEntity(StockMovement movement) {
             return new Response(
-                    m.getId(),
-                    m.getProduct() != null ? m.getProduct().getId() : null,
-                    m.getMovementType(),
-                    m.getQuantity(),
-                    m.getDestination(),
-                    m.getReason(),
-                    m.getMovementDate()
+                    movement.getId(),
+                    movement.getProduct() != null ? movement.getProduct().getId() : null,
+                    movement.getMovementType(),
+                    movement.getQuantity(),
+                    movement.getDestination(),
+                    movement.getReason(),
+                    movement.getMovementDate()
             );
         }
     }
