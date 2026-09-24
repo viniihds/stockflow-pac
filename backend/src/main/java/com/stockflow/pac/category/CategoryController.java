@@ -5,11 +5,18 @@ import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.RequestMethod;
 
 import static com.stockflow.pac.category.CategoryDTOs.*;
 
 @RestController
 @RequestMapping("/api/categories")
+@CrossOrigin(
+        origins = {"http://localhost:5173"},
+        methods = {RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT, RequestMethod.DELETE, RequestMethod.OPTIONS},
+        allowedHeaders = {"*"}
+)
 public class CategoryController {
 
     private final CategoryService categoryService;

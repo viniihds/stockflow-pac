@@ -40,7 +40,148 @@ const shortcuts = [
   { title: 'Relatorios', text: 'Visao operacional e financeira.' },
 ] as const;
 
+import { Link, NavLink, Route, Routes, useLocation } from 'react-router-dom';
+import CategoriesPage from './categories/CategoriesPage';
+
+function Dashboard() {
+  return (
+    <main className="workspace">
+      <header className="topbar">
+        <div>
+          <p className="eyebrow">Painel operacional</p>
+          <h2>Visao geral do estoque</h2>
+        </div>
+
+        <div className="topbar-actions">
+          <label className="search-field">
+            <span className="search-label">Buscar</span>
+            <input type="search" placeholder="Produto, categoria ou pedido" readOnly />
+          </label>
+          <button type="button" className="button button-secondary">
+            Exportar
+          </button>
+          <button type="button" className="button button-primary">
+            Novo produto
+          </button>
+        </div>
+      </header>
+
+      <section className="hero-strip">
+        <div>
+          <p className="section-label">Base documental</p>
+          <h3>Controle de produtos, entradas, saidas, prazos e financeiro em uma unica visao.</h3>
+          <p>
+            A primeira entrega prioriza leitura rapida do estado da operacao e deixa a navegacao
+            preparada para o cadastro, o acompanhamento de movimentacoes e os relatorios.
+          </p>
+        </div>
+
+        <div className="hero-meta">
+          <div>
+            <span className="meta-value">24</span>
+            <span className="meta-label">produtos com alerta</span>
+          </div>
+          <div>
+            <span className="meta-value">5</span>
+            <span className="meta-label">entregas aguardadas</span>
+          </div>
+          <div>
+            <span className="meta-value">R$ 128 mil</span>
+            <span className="meta-label">estoque valorizado</span>
+          </div>
+        </div>
+      </section>
+
+      <section className="kpi-grid" aria-label="Indicadores principais">
+        {kpis.map((item) => (
+          <article key={item.label} className={`kpi-card kpi-${item.tone}`}>
+            <p className="section-label">{item.label}</p>
+            <strong>{item.value}</strong>
+            <span>{item.detail}</span>
+          </article>
+        ))}
+      </section>
+
+      <section className="content-grid">
+        <article className="panel panel-wide">
+          <div className="panel-header">
+            <div>
+              <p className="section-label">Movimentacoes recentes</p>
+              <h3>Ultimas operacoes registradas</h3>
+            </div>
+            <span className="panel-note">Mock visual da primeira versao</span>
+          </div>
+
+          <div className="table-scroll">
+            <table className="data-table">
+              <thead>
+                <tr>
+                  <th>Produto</th>
+                  <th>Tipo</th>
+                  <th>Quantidade</th>
+                  <th>Responsavel</th>
+                  <th>Data</th>
+                </tr>
+              </thead>
+              <tbody>
+                {movements.map((movement) => (
+                  <tr key={`${movement.product}-${movement.date}-${movement.type}`}>
+                    <td>{movement.product}</td>
+                    <td>
+                      <span
+                        className={`status-pill ${
+                          movement.type === 'Entrada' ? 'status-entry' : 'status-exit'
+                        }`}
+                      >
+                        {movement.type}
+                      </span>
+                    </td>
+                    <td>{movement.qty}</td>
+                    <td>{movement.actor}</td>
+                    <td>{movement.date}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </article>
+
+        <section className="panel panel-rail">
+          <div>
+            <p className="section-label">Alertas de prioridade</p>
+            <h3>Pontos que exigem atencao</h3>
+          </div>
+
+          <ul className="alert-list">
+            {alerts.map((alert) => (
+              <li key={alert.title} className="alert-item">
+                <span className={`alert-level alert-level-${alert.levelClass}`}>{alert.level}</span>
+                <strong>{alert.title}</strong>
+                <p>{alert.text}</p>
+              </li>
+            ))}
+          </ul>
+
+          <div>
+            <p className="section-label">Atalhos</p>
+            <div className="shortcut-grid">
+              {shortcuts.map((shortcut) => (
+                <div key={shortcut.title} className="shortcut">
+                  <strong>{shortcut.title}</strong>
+                  <span>{shortcut.text}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+      </section>
+    </main>
+  );
+}
+
 export default function App() {
+  const location = useLocation();
+  const isActive = (path: string) => (location.pathname === path ? 'nav-item nav-item-active' : 'nav-item');
   return (
     <div className="app-shell">
       <aside className="sidebar">
@@ -53,24 +194,12 @@ export default function App() {
         </div>
 
         <nav className="nav-list" aria-label="Navegacao principal">
-          <button className="nav-item nav-item-active" type="button">
-            Painel inicial
-          </button>
-          <button className="nav-item" type="button">
-            Produtos
-          </button>
-          <button className="nav-item" type="button">
-            Categorias
-          </button>
-          <button className="nav-item" type="button">
-            Movimentacoes
-          </button>
-          <button className="nav-item" type="button">
-            Financeiro
-          </button>
-          <button className="nav-item" type="button">
-            Relatorios
-          </button>
+          <NavLink to="/" className={() => isActive('/')}>Painel inicial</NavLink>
+          <button className="nav-item" type="button">Produtos</button>
+          <NavLink to="/categories" className={() => isActive('/categories')}>Categorias</NavLink>
+          <button className="nav-item" type="button">Movimentacoes</button>
+          <button className="nav-item" type="button">Financeiro</button>
+          <button className="nav-item" type="button">Relatorios</button>
         </nav>
 
         <section className="sidebar-card">
@@ -83,137 +212,10 @@ export default function App() {
         </section>
       </aside>
 
-      <main className="workspace">
-        <header className="topbar">
-          <div>
-            <p className="eyebrow">Painel operacional</p>
-            <h2>Visao geral do estoque</h2>
-          </div>
-
-          <div className="topbar-actions">
-            <label className="search-field">
-              <span className="search-label">Buscar</span>
-              <input type="search" placeholder="Produto, categoria ou pedido" readOnly />
-            </label>
-            <button type="button" className="button button-secondary">
-              Exportar
-            </button>
-            <button type="button" className="button button-primary">
-              Novo produto
-            </button>
-          </div>
-        </header>
-
-        <section className="hero-strip">
-          <div>
-            <p className="section-label">Base documental</p>
-            <h3>Controle de produtos, entradas, saidas, prazos e financeiro em uma unica visao.</h3>
-            <p>
-              A primeira entrega prioriza leitura rapida do estado da operacao e deixa a navegacao
-              preparada para o cadastro, o acompanhamento de movimentacoes e os relatorios.
-            </p>
-          </div>
-
-          <div className="hero-meta">
-            <div>
-              <span className="meta-value">24</span>
-              <span className="meta-label">produtos com alerta</span>
-            </div>
-            <div>
-              <span className="meta-value">5</span>
-              <span className="meta-label">entregas aguardadas</span>
-            </div>
-            <div>
-              <span className="meta-value">R$ 128 mil</span>
-              <span className="meta-label">estoque valorizado</span>
-            </div>
-          </div>
-        </section>
-
-        <section className="kpi-grid" aria-label="Indicadores principais">
-          {kpis.map((item) => (
-            <article key={item.label} className={`kpi-card kpi-${item.tone}`}>
-              <p className="section-label">{item.label}</p>
-              <strong>{item.value}</strong>
-              <span>{item.detail}</span>
-            </article>
-          ))}
-        </section>
-
-        <section className="content-grid">
-          <article className="panel panel-wide">
-            <div className="panel-header">
-              <div>
-                <p className="section-label">Movimentacoes recentes</p>
-                <h3>Ultimas operacoes registradas</h3>
-              </div>
-              <span className="panel-note">Mock visual da primeira versao</span>
-            </div>
-
-            <div className="table-scroll">
-              <table className="data-table">
-                <thead>
-                  <tr>
-                    <th>Produto</th>
-                    <th>Tipo</th>
-                    <th>Quantidade</th>
-                    <th>Responsavel</th>
-                    <th>Data</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {movements.map((movement) => (
-                    <tr key={`${movement.product}-${movement.date}-${movement.type}`}>
-                      <td>{movement.product}</td>
-                      <td>
-                        <span
-                          className={`status-pill ${
-                            movement.type === 'Entrada' ? 'status-entry' : 'status-exit'
-                          }`}
-                        >
-                          {movement.type}
-                        </span>
-                      </td>
-                      <td>{movement.qty}</td>
-                      <td>{movement.actor}</td>
-                      <td>{movement.date}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </article>
-
-          <section className="panel panel-rail">
-            <div>
-              <p className="section-label">Alertas de prioridade</p>
-              <h3>Pontos que exigem atencao</h3>
-            </div>
-
-            <ul className="alert-list">
-              {alerts.map((alert) => (
-                <li key={alert.title} className="alert-item">
-                  <span className={`alert-level alert-level-${alert.levelClass}`}>{alert.level}</span>
-                  <strong>{alert.title}</strong>
-                  <p>{alert.text}</p>
-                </li>
-              ))}
-            </ul>
-
-            <div>
-              <p className="section-label">Atalhos</p>
-              <div className="shortcut-grid">
-                {shortcuts.map((shortcut) => (
-                  <div key={shortcut.title} className="shortcut">
-                    <strong>{shortcut.title}</strong>
-                    <span>{shortcut.text}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </section>
-        </section>
-      </main>
+      <Routes>
+        <Route path="/" element={<Dashboard />} />
+        <Route path="/categories" element={<CategoriesPage />} />
+      </Routes>
     </div>
   );
 }
