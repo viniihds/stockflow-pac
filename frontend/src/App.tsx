@@ -42,6 +42,7 @@ const shortcuts = [
 
 import { Link, NavLink, Route, Routes, useLocation } from 'react-router-dom';
 import CategoriesPage from './categories/CategoriesPage';
+import ProductsPage from './products/ProductsPage';
 
 function Dashboard() {
   return (
@@ -195,7 +196,7 @@ export default function App() {
 
         <nav className="nav-list" aria-label="Navegacao principal">
           <NavLink to="/" className={() => isActive('/')}>Painel inicial</NavLink>
-          <button className="nav-item" type="button">Produtos</button>
+          <NavLink to="/products" className={() => isActive('/products')}>Produtos</NavLink>
           <NavLink to="/categories" className={() => isActive('/categories')}>Categorias</NavLink>
           <button className="nav-item" type="button">Movimentacoes</button>
           <button className="nav-item" type="button">Financeiro</button>
@@ -214,6 +215,7 @@ export default function App() {
 
       <Routes>
         <Route path="/" element={<Dashboard />} />
+        <Route path="/products" element={<ProductsPage />} />
         <Route path="/categories" element={<CategoriesPage />} />
       </Routes>
     </div>
