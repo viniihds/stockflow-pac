@@ -181,6 +181,56 @@ export const api = {
   deleteProduct(id: number) {
     return http<void>(`/products/${id}`, { method: 'DELETE' });
   },
+
+  // Movimentações de estoque (mínimo para protótipo)
+  async listMovementsSimple(): Promise<StockMovement[]> {
+    const data = await http<any>(`/stock-movements`);
+    const normalize = (m: any): StockMovement => ({
+      id: m.id,
+      // backend usa movementType/destination/movementDate
+      type: m.type ?? m.movementType,
+      productId: m.productId ?? null,
+      productName: m.productName ?? null,
+      quantity: m.quantity,
+      actor: m.actor ?? m.destination ?? null,
+      reason: m.reason ?? null,
+      note: m.note ?? null,
+      date: m.date ?? m.movementDate ?? null,
+    });
+    if (Array.isArray(data)) return data.map(normalize) as StockMovement[];
+    if (data && Array.isArray((data as any).content)) return (data as any).content.map(normalize) as StockMovement[];
+    return [];
+  },
+  async createMovement(body: StockMovementCreate): Promise<StockMovement> {
+    const saved = await http<any>(`/stock-movements`, { method: 'POST', body: JSON.stringify(body) });
+    const normalize = (m: any): StockMovement => ({
+      id: m.id,
+      type: m.type ?? m.movementType,
+      productId: m.productId ?? null,
+      productName: m.productName ?? null,
+      quantity: m.quantity,
+      actor: m.actor ?? m.destination ?? null,
+      reason: m.reason ?? null,
+      note: m.note ?? null,
+      date: m.date ?? m.movementDate ?? null,
+    });
+    return normalize(saved);
+  },
+
+  // Financeiro - geração de relatório (apenas mock quando backend ausente)
+  async generateFinanceReport(body: FinanceReportRequest): Promise<FinanceReport> {
+    return await http<FinanceReport>(`/finance/reports`, { method: 'POST', body: JSON.stringify(body) });
+  },
+
+  async listReports(): Promise<GenericReport[]> {
+    const data = await http<any>(`/reports`);
+    if (Array.isArray(data)) return data as GenericReport[];
+    if (data && Array.isArray((data as any).content)) return (data as any).content as GenericReport[];
+    return [];
+  },
+  async createReport(body: CreateGenericReport): Promise<GenericReport> {
+    return await http<GenericReport>(`/reports`, { method: 'POST', body: JSON.stringify(body) });
+  },
 };
 
 export type ProductCreate = {
@@ -195,3 +245,51 @@ export type ProductCreate = {
 };
 
 export type ProductUpdate = Partial<ProductCreate>;
+
+// Tipos adicionais
+export type StockMovement = {
+  id: number;
+  type: 'ENTRY' | 'EXIT';
+  productId?: number | null;
+  productName?: string | null;
+  quantity: number;
+  actor?: string | null;
+  reason?: string | null;
+  note?: string | null;
+  date: string; // ISO
+};
+
+export type StockMovementCreate = Omit<StockMovement, 'id' | 'date'>;
+
+export type FinanceReportRequest = {
+  periodStart?: string;
+  periodEnd?: string;
+  costCenter?: string;
+  notes?: string;
+};
+
+export type FinanceReport = {
+  id: number;
+  createdAt: string;
+  periodStart?: string;
+  periodEnd?: string;
+  totals: { income: number; expenses: number; balance: number };
+};
+
+export type GenericReport = {
+  id: number;
+  title: string;
+  periodStart?: string;
+  periodEnd?: string;
+  createdAt: string;
+  filters?: string | null;
+};
+
+export type CreateGenericReport = {
+  title?: string;
+  periodStart?: string;
+  periodEnd?: string;
+  filters?: string;
+};
+
+// Removidos mocks e fallback em localStorage conforme requisito
