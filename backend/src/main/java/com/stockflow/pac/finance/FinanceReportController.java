@@ -6,19 +6,22 @@ import org.springframework.web.bind.annotation.*;
 
 import static com.stockflow.pac.finance.FinanceReportDTOs.*;
 
-@RestController
-@RequestMapping("/api/finance/reports")
-public class FinanceReportController {
-
-    private final FinanceReportService service;
-
-    public FinanceReportController(FinanceReportService service) {
-        this.service = service;
-    }
-
-    @PostMapping
-    public ResponseEntity<Response> generate(@RequestBody Request body) {
-        var rep = service.generate(body);
-        return ResponseEntity.status(HttpStatus.CREATED).body(Response.fromEntity(rep));
-    }
-}
+// Desabilitado conforme requisito: remover a opção/rotas de gerar relatório financeiro neste momento.
+// Mantemos o arquivo para documentação, porém a controller fica comentada para não expor as rotas.
+//
+// @RestController
+// @RequestMapping("/api/finance/reports")
+// public class FinanceReportController {
+//
+//     private final FinanceReportService service;
+//
+//     public FinanceReportController(FinanceReportService service) {
+//         this.service = service;
+//     }
+//
+//     @PostMapping
+//     public ResponseEntity<Response> generate(@RequestBody Request body) {
+//         var rep = service.generate(body);
+//         return ResponseEntity.status(HttpStatus.CREATED).body(Response.fromEntity(rep));
+//     }
+// }

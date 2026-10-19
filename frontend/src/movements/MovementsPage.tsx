@@ -1,6 +1,25 @@
 import { useEffect, useMemo, useState } from 'react';
 import { api, StockMovement, StockMovementCreate, Product } from '../api';
 
+// Extrai uma mensagem amigável de diferentes formatos/estruturas de erro
+function friendlyMessage(err: any): string {
+  const fallback = 'Ocorreu um erro. Tente novamente.';
+  if (!err) return fallback;
+  const msg = typeof err === 'string' ? err : err.message || err.toString?.();
+  if (typeof msg !== 'string') return fallback;
+  const trimmed = msg.trim();
+  // Se vier um JSON stringificado, tenta extrair campos comuns de mensagem
+  if (trimmed.startsWith('{') && trimmed.endsWith('}')) {
+    try {
+      const parsed = JSON.parse(trimmed);
+      return parsed?.message || parsed?.error_description || parsed?.error || fallback;
+    } catch {
+      // mantém o texto simples
+    }
+  }
+  return msg;
+}
+
 function NewMovementChooser({ open, onClose, onChoose }: { open: boolean; onClose: () => void; onChoose: (type: 'ENTRY' | 'EXIT') => void }) {
   if (!open) return null;
   return (
@@ -79,7 +98,7 @@ function MovementFormModal({ open, type, onClose, onSaved }: { open: boolean; ty
       onSaved(saved);
       onClose();
     } catch (err: any) {
-      setError(err?.message || 'Erro ao registrar movimentação');
+      setError(friendlyMessage(err) || 'Erro ao registrar movimentação');
     } finally {
       setSaving(false);
     }
@@ -152,7 +171,7 @@ export default function MovementsPage() {
         const data = await api.listMovementsSimple();
         setItems(data);
       } catch (err: any) {
-        setError(err?.message || 'Erro ao carregar movimentações');
+        setError(friendlyMessage(err) || 'Erro ao carregar movimentações');
       } finally {
         setLoading(false);
       }

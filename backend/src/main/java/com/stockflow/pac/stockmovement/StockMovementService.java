@@ -23,7 +23,8 @@ public class StockMovementService {
     }
 
     public Page<StockMovement> list(Long productId, MovementType movementType, int page, int size) {
-        Pageable pageable = PageRequest.of(page, size);
+        // Ordenar por data mais recente
+        Pageable pageable = PageRequest.of(page, size, org.springframework.data.domain.Sort.by(org.springframework.data.domain.Sort.Direction.DESC, "movementDate"));
         if (productId != null && movementType != null) {
             return stockMovementRepository.findByProduct_IdAndMovementType(productId, movementType, pageable);
         }

@@ -1,75 +1,74 @@
-import { useState } from 'react';
-import { api, FinanceReport, FinanceReportRequest } from '../api';
+import { useEffect, useMemo, useState } from 'react';
+import { api, Product, StockMovement } from '../api';
 
-function FinanceReportModal({ open, onClose, onGenerated }: { open: boolean; onClose: () => void; onGenerated: (r: FinanceReport) => void }) {
-  const [periodStart, setPeriodStart] = useState('');
-  const [periodEnd, setPeriodEnd] = useState('');
-  const [costCenter, setCostCenter] = useState('');
-  const [notes, setNotes] = useState('');
-  const [saving, setSaving] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  if (!open) return null;
-
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    try {
-      setSaving(true);
-      setError(null);
-      const body: FinanceReportRequest = {
-        periodStart: periodStart || undefined,
-        periodEnd: periodEnd || undefined,
-        costCenter: costCenter || undefined,
-        notes: notes || undefined,
-      };
-      const rep = await api.generateFinanceReport(body);
-      onGenerated(rep);
-      onClose();
-    } catch (err: any) {
-      setError(err?.message || 'Erro ao gerar relatório');
-    } finally {
-      setSaving(false);
-    }
-  }
-
-  return (
-    <div className="modal-backdrop" role="dialog" aria-modal="true">
-      <div className="modal-card">
-        <header className="modal-header">
-          <h3>Gerar Relatório Financeiro</h3>
-        </header>
-        <form className="modal-body" onSubmit={handleSubmit}>
-          <div className="form-field" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
-            <label className="form-field">
-              <span>Período inicial</span>
-              <input type="date" value={periodStart} onChange={(e) => setPeriodStart(e.target.value)} />
-            </label>
-            <label className="form-field">
-              <span>Período final</span>
-              <input type="date" value={periodEnd} onChange={(e) => setPeriodEnd(e.target.value)} />
-            </label>
-          </div>
-          <label className="form-field">
-            <span>Centro de custo</span>
-            <input value={costCenter} onChange={(e) => setCostCenter(e.target.value)} />
-          </label>
-          <label className="form-field">
-            <span>Observações</span>
-            <input value={notes} onChange={(e) => setNotes(e.target.value)} />
-          </label>
-          {error && <p className="form-error">{error}</p>}
-          <footer className="modal-actions">
-            <button type="button" className="button button-secondary" onClick={onClose} disabled={saving}>Cancelar</button>
-            <button type="submit" className="button button-primary" disabled={saving}>{saving ? 'Gerando...' : 'Gerar PDF'}</button>
-          </footer>
-        </form>
-      </div>
-    </div>
-  );
-}
+type Summary = {
+  totalEntrada: number;
+  totalSaida: number;
+  saldo: number; // entrada - saida
+};
 
 export default function FinancePage() {
-  const [modalOpen, setModalOpen] = useState(false);
-  const [lastReport, setLastReport] = useState<FinanceReport | null>(null);
+  const [from, setFrom] = useState<string>('');
+  const [to, setTo] = useState<string>('');
+  const [movs, setMovs] = useState<StockMovement[]>([]);
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const load = useMemo(
+    () => async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        const [m, p] = await Promise.all([api.listMovementsSimple(), api.listProductsSimple()]);
+        setMovs(m);
+        setProducts(p);
+      } catch (e: any) {
+        setError(e?.message || 'Erro ao carregar dados financeiros');
+      } finally {
+        setLoading(false);
+      }
+    },
+    [],
+  );
+
+  useEffect(() => {
+    load();
+  }, [load]);
+
+  function withinRange(dateIso?: string | null) {
+    if (!dateIso) return false;
+    const t = new Date(dateIso).getTime();
+    if (Number.isNaN(t)) return false;
+    const gte = from ? new Date(from).getTime() : undefined;
+    const lte = to ? new Date(to).getTime() : undefined;
+    if (gte != null && t < gte) return false;
+    if (lte != null) {
+      // incluir o dia final inteiro
+      const end = new Date(to);
+      end.setHours(23, 59, 59, 999);
+      if (t > end.getTime()) return false;
+    }
+    return true;
+  }
+
+  const summary: Summary = useMemo(() => {
+    const byId = new Map<number, Product>();
+    for (const p of products) byId.set(p.id, p);
+    let entrada = 0;
+    let saida = 0;
+    for (const m of movs) {
+      if (!withinRange(m.date)) continue;
+      const price = byId.get(m.productId || -1)?.price || 0;
+      const total = price * (m.quantity ?? 0);
+      if (m.type === 'ENTRY') entrada += total;
+      else saida += total;
+    }
+    return { totalEntrada: entrada, totalSaida: saida, saldo: entrada - saida };
+  }, [movs, products, from, to]);
+
+  const lucro = summary.saldo > 0 ? summary.saldo : 0;
+  const prejuizo = summary.saldo < 0 ? Math.abs(summary.saldo) : 0;
 
   return (
     <div className="workspace">
@@ -78,46 +77,76 @@ export default function FinancePage() {
           <p className="eyebrow">Financeiro</p>
           <h2>Gestão Financeira</h2>
         </div>
-        <div className="topbar-actions">
-          <button className="button button-primary" onClick={() => setModalOpen(true)}>+ Gerar Relatório</button>
+        <div className="topbar-actions" style={{ alignItems: 'end' }}>
+          <div className="form-field" style={{ minWidth: 0, margin: 0 }}>
+            <span>Período</span>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+              <input type="date" value={from} onChange={(e) => setFrom(e.target.value)} />
+              <input type="date" value={to} onChange={(e) => setTo(e.target.value)} />
+            </div>
+          </div>
         </div>
       </header>
 
+      {error && <div className="alert error">{error}</div>}
+      {loading && <div className="skeleton" style={{ height: 120 }} />}
+
+      {!loading && (
+        <section className="kpi-grid">
+          <div className="kpi-card kpi-emerald">
+            <strong>R$ {summary.totalEntrada.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</strong>
+            <span>Entrada total</span>
+          </div>
+          <div className="kpi-card kpi-rose">
+            <strong>R$ {summary.totalSaida.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</strong>
+            <span>Saída total</span>
+          </div>
+          <div className="kpi-card kpi-sky">
+            <strong>R$ {lucro.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</strong>
+            <span>Lucro no período</span>
+          </div>
+          <div className="kpi-card kpi-amber">
+            <strong>R$ {prejuizo.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</strong>
+            <span>Prejuízo no período</span>
+          </div>
+        </section>
+      )}
+
       <section className="panel">
         <div className="panel-head">
-          <h3>Resumo Financeiro</h3>
-          {lastReport && <span className="muted">Último relatório: {new Date(lastReport.createdAt).toLocaleString('pt-BR')}</span>}
+          <h3>Transações consideradas</h3>
+          <span className="muted">{movs.filter((m) => withinRange(m.date)).length} movimentações</span>
         </div>
-        {!lastReport && (
-          <div className="panel-empty" style={{ padding: 24 }}>
-            <p className="muted">Nenhum relatório gerado ainda.</p>
-            <p className="muted small">Clique em "+ Gerar Relatório" para criar o primeiro resumo financeiro.</p>
+        <div className="table">
+          <div className="table-row table-head" style={{ gridTemplateColumns: '1.4fr 0.9fr 0.7fr 1fr 1fr' }}>
+            <div>Produto</div>
+            <div>Tipo</div>
+            <div>Qtd</div>
+            <div>Responsável</div>
+            <div>Data</div>
           </div>
-        )}
-        {lastReport && (
-          <div className="table" style={{ marginTop: 8 }}>
-            <div className="table-row table-head" style={{ gridTemplateColumns: '1fr 1fr 1fr' }}>
-              <div>Período</div>
-              <div>Totais</div>
-              <div>Gerado em</div>
-            </div>
-            <div className="table-row" style={{ gridTemplateColumns: '1fr 1fr 1fr' }}>
-              <div>
-                <div>Início: {lastReport.periodStart ? new Date(lastReport.periodStart).toLocaleDateString('pt-BR') : '—'}</div>
-                <div>Fim: {lastReport.periodEnd ? new Date(lastReport.periodEnd).toLocaleDateString('pt-BR') : '—'}</div>
+          {movs.filter((m) => withinRange(m.date)).map((m) => {
+            const d = m.date ? new Date(m.date) : null;
+            const dateStr = d && !isNaN(d.getTime()) ? d.toLocaleString('pt-BR') : '—';
+            return (
+              <div key={m.id} className="table-row" style={{ gridTemplateColumns: '1.4fr 0.9fr 0.7fr 1fr 1fr' }}>
+                <div>{m.productName ?? (m.productId ? `#${m.productId}` : '—')}</div>
+                <div>
+                  <span className={`status-pill ${m.type === 'ENTRY' ? 'status-entry' : 'status-exit'}`}>
+                    {m.type === 'ENTRY' ? 'Entrada' : 'Saída'}
+                  </span>
+                </div>
+                <div>{m.quantity}</div>
+                <div>{m.actor ?? '—'}</div>
+                <div>{dateStr}</div>
               </div>
-              <div>
-                <div>Receitas: R$ {lastReport.totals.income.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</div>
-                <div>Despesas: R$ {lastReport.totals.expenses.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</div>
-                <div><strong>Saldo: R$ {lastReport.totals.balance.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</strong></div>
-              </div>
-              <div>{new Date(lastReport.createdAt).toLocaleString('pt-BR')}</div>
-            </div>
-          </div>
-        )}
+            );
+          })}
+          {movs.filter((m) => withinRange(m.date)).length === 0 && (
+            <div className="table-empty">Nenhuma movimentação no período.</div>
+          )}
+        </div>
       </section>
-
-      <FinanceReportModal open={modalOpen} onClose={() => setModalOpen(false)} onGenerated={(r) => setLastReport(r)} />
     </div>
   );
 }

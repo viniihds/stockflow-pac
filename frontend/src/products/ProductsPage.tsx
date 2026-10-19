@@ -1,9 +1,10 @@
 import { useEffect, useMemo, useState } from 'react';
-import { api, Product } from '../api';
+import { api, Product, Category } from '../api';
 import ProductFormModal from './ProductFormModal';
 
 export default function ProductsPage() {
   const [items, setItems] = useState<Product[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [query, setQuery] = useState('');
@@ -29,6 +30,15 @@ export default function ProductsPage() {
 
   useEffect(() => {
     load();
+    // carrega categorias para obter cor e nome
+    (async () => {
+      try {
+        const cats = await api.listCategoriesSimple();
+        setCategories(cats);
+      } catch {
+        // ignora erro silenciosamente
+      }
+    })();
   }, [load]);
 
   function openCreate() {
@@ -70,6 +80,13 @@ export default function ProductsPage() {
     return <span className={`status-pill ${cls}`}>{label}</span>;
   }
 
+  const catColor = (p: Product) => {
+    const id = p.categoryId;
+    if (!id) return undefined;
+    const c = categories.find((x) => x.id === id);
+    return c?.color || undefined;
+  };
+
   return (
     <div className="workspace">
       <header className="topbar">
@@ -107,7 +124,7 @@ export default function ProductsPage() {
 
         {!loading && (
           <div className="table">
-            <div className="table-row table-head">
+            <div className="table-row table-head" style={{ gridTemplateColumns: '1.5fr 1fr 0.8fr 0.8fr 0.9fr 0.8fr' }}>
               <div>Produto</div>
               <div>Categoria</div>
               <div>Preço</div>
@@ -124,7 +141,10 @@ export default function ProductsPage() {
                       {p.code && <div className="muted small">{p.code}</div>}
                     </div>
                   </div>
-                  <div>{p.categoryName ?? '—'}</div>
+                  <div className="cell-name">
+                    <span className="color-bullet" style={{ backgroundColor: catColor(p) || '#94a3b8' }} />
+                    <span>{p.categoryName ?? '—'}</span>
+                  </div>
                   <div>{p.price != null ? `R$ ${p.price.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}` : '—'}</div>
                   <div>{p.quantity ?? 0}</div>
                   <div>{renderStatus(p)}</div>

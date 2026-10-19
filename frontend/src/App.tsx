@@ -33,25 +33,11 @@ function Dashboard() {
 
   return (
     <main className="workspace">
-      <header className="topbar">
-        <div>
-          <p className="eyebrow">Painel operacional</p>
-          <h2>Visao geral do estoque</h2>
-        </div>
-
-        <div className="topbar-actions">
-          <label className="search-field">
-            <span className="search-label">Buscar</span>
-            <input type="search" placeholder="Produto, categoria ou pedido" readOnly />
-          </label>
-          <button type="button" className="button button-secondary">
-            Exportar
-          </button>
-          <button type="button" className="button button-primary">
-            Novo produto
-          </button>
-        </div>
-      </header>
+      {/* Toolbar removida conforme requisito: página inicial sem barra superior */}
+      <div>
+        <p className="eyebrow">Painel operacional</p>
+        <h2 style={{ marginTop: 6 }}>Visao geral do estoque</h2>
+      </div>
 
       <section className="hero-strip">
         <div>

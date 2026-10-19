@@ -42,8 +42,15 @@ async function http<T>(path: string, init?: RequestInit): Promise<T> {
     headers,
   });
   if (!res.ok) {
-    const text = await res.text();
-    throw new Error(`Erro na API (${res.status}): ${text || res.statusText}`);
+    // Tentar extrair uma mensagem amigável do JSON retornado pelo backend
+    const raw = await res.text();
+    try {
+      const parsed = raw ? JSON.parse(raw) : null;
+      const friendly = parsed?.message || parsed?.error_description || parsed?.error;
+      throw new Error(friendly || `Erro ${res.status}: ${res.statusText}`);
+    } catch {
+      throw new Error(raw || `Erro ${res.status}: ${res.statusText}`);
+    }
   }
   if (res.status === 204) return undefined as unknown as T;
 
@@ -197,9 +204,17 @@ export const api = {
       note: m.note ?? null,
       date: m.date ?? m.movementDate ?? null,
     });
-    if (Array.isArray(data)) return data.map(normalize) as StockMovement[];
-    if (data && Array.isArray((data as any).content)) return (data as any).content.map(normalize) as StockMovement[];
-    return [];
+    const list = Array.isArray(data)
+      ? (data as any[]).map(normalize)
+      : data && Array.isArray((data as any).content)
+        ? ((data as any).content as any[]).map(normalize)
+        : [];
+    // Ordenar por data (mais recente primeiro)
+    return list.sort((a, b) => {
+      const da = a.date ? new Date(a.date).getTime() : 0;
+      const db = b.date ? new Date(b.date).getTime() : 0;
+      return db - da;
+    });
   },
   async createMovement(body: StockMovementCreate): Promise<StockMovement> {
     const saved = await http<any>(`/stock-movements`, { method: 'POST', body: JSON.stringify(body) });
