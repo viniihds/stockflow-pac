@@ -1,15 +1,37 @@
+-- Users and roles
+CREATE TABLE users (
+                            id BIGSERIAL PRIMARY KEY,
+                            email VARCHAR(160) NOT NULL UNIQUE,
+                            password_hash VARCHAR(100) NOT NULL,
+                            created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE user_roles (
+    user_id BIGINT NOT NULL,
+    role VARCHAR(20) NOT NULL,
+    CONSTRAINT fk_user_roles_user FOREIGN KEY (user_id) REFERENCES users(id)
+);
+
+CREATE INDEX idx_user_roles_user ON user_roles(user_id);
+
 CREATE TABLE categories (
                             id BIGSERIAL PRIMARY KEY,
+                            user_id BIGINT,
                             name VARCHAR(100) NOT NULL UNIQUE,
                             description VARCHAR(500),
                             color VARCHAR(20),
                             active BOOLEAN NOT NULL DEFAULT TRUE,
                             created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-                            updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+                            updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+                            CONSTRAINT fk_categories_user FOREIGN KEY (user_id) REFERENCES users(id)
 );
+
+CREATE INDEX idx_categories_user ON categories(user_id);
 
 CREATE TABLE products (
                           id BIGSERIAL PRIMARY KEY,
+                          user_id BIGINT,
                           category_id BIGINT NOT NULL,
                           name VARCHAR(150) NOT NULL,
                           code VARCHAR(50) NOT NULL UNIQUE,
@@ -25,6 +47,10 @@ CREATE TABLE products (
                               FOREIGN KEY (category_id)
                                   REFERENCES categories(id),
 
+                          CONSTRAINT fk_products_user
+                              FOREIGN KEY (user_id)
+                                  REFERENCES users(id),
+
                           CONSTRAINT chk_products_price
                               CHECK (price >= 0),
 
@@ -35,8 +61,11 @@ CREATE TABLE products (
                               CHECK (minimum_stock >= 0)
 );
 
+CREATE INDEX idx_products_user ON products(user_id);
+
 CREATE TABLE stock_movements (
                                  id BIGSERIAL PRIMARY KEY,
+                                 user_id BIGINT,
                                  product_id BIGINT NOT NULL,
                                  movement_type VARCHAR(20) NOT NULL,
                                  quantity INTEGER NOT NULL,
@@ -49,6 +78,10 @@ CREATE TABLE stock_movements (
                                      FOREIGN KEY (product_id)
                                          REFERENCES products(id),
 
+                                 CONSTRAINT fk_stock_movements_user
+                                     FOREIGN KEY (user_id)
+                                         REFERENCES users(id),
+
                                  CONSTRAINT chk_stock_movements_type
                                      CHECK (movement_type IN ('ENTRY', 'EXIT')),
 
@@ -56,26 +89,43 @@ CREATE TABLE stock_movements (
                                      CHECK (quantity > 0)
 );
 
+CREATE INDEX idx_stock_movements_user ON stock_movements(user_id);
+
 CREATE TABLE financial_categories (
                                       id BIGSERIAL PRIMARY KEY,
+                                      user_id BIGINT,
                                       name VARCHAR(100) NOT NULL UNIQUE,
                                       description VARCHAR(500),
                                       active BOOLEAN NOT NULL DEFAULT TRUE,
                                       created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-                                      updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+                                      updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+                                      CONSTRAINT fk_financial_categories_user
+                                          FOREIGN KEY (user_id)
+                                              REFERENCES users(id)
 );
+
+CREATE INDEX idx_financial_categories_user ON financial_categories(user_id);
 
 CREATE TABLE cost_centers (
                               id BIGSERIAL PRIMARY KEY,
+                              user_id BIGINT,
                               name VARCHAR(100) NOT NULL UNIQUE,
                               description VARCHAR(500),
                               active BOOLEAN NOT NULL DEFAULT TRUE,
                               created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-                              updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+                              updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+                              CONSTRAINT fk_cost_centers_user
+                                  FOREIGN KEY (user_id)
+                                      REFERENCES users(id)
 );
+
+CREATE INDEX idx_cost_centers_user ON cost_centers(user_id);
 
 CREATE TABLE financial_transactions (
                                         id BIGSERIAL PRIMARY KEY,
+                                        user_id BIGINT,
                                         financial_category_id BIGINT NOT NULL,
                                         cost_center_id BIGINT,
                                         stock_movement_id BIGINT,
@@ -98,9 +148,15 @@ CREATE TABLE financial_transactions (
                                             FOREIGN KEY (stock_movement_id)
                                                 REFERENCES stock_movements(id),
 
+                                        CONSTRAINT fk_financial_transactions_user
+                                            FOREIGN KEY (user_id)
+                                                REFERENCES users(id),
+
                                         CONSTRAINT chk_financial_transactions_type
                                             CHECK (transaction_type IN ('INCOME', 'EXPENSE')),
 
                                         CONSTRAINT chk_financial_transactions_amount
                                             CHECK (amount > 0)
 );
+
+CREATE INDEX idx_financial_transactions_user ON financial_transactions(user_id);

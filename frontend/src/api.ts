@@ -29,7 +29,18 @@ export type Page<T> = {
   size: number; // page size
 };
 
-const API_BASE = import.meta.env.VITE_API_BASE ?? 'http://localhost:8080/api';
+// Detecta automaticamente o host do backend quando acessado via LAN (ex.: 192.168.x.x)
+// Caso VITE_API_BASE não esteja definida, usa o hostname atual na porta 8080.
+const API_BASE =
+  import.meta.env.VITE_API_BASE ?? `${window.location.protocol}//${window.location.hostname}:8080/api`;
+
+function getToken(): string | null {
+  try {
+    return localStorage.getItem('sf_token');
+  } catch {
+    return null;
+  }
+}
 
 async function http<T>(path: string, init?: RequestInit): Promise<T> {
   const hasBody = init && 'body' in init && (init as RequestInit).body != null;
@@ -37,6 +48,8 @@ async function http<T>(path: string, init?: RequestInit): Promise<T> {
     ...(init?.headers as Record<string, string>),
     ...(hasBody ? { 'Content-Type': 'application/json' } : {}),
   };
+  const token = getToken();
+  if (token) headers['Authorization'] = `Bearer ${token}`;
   const res = await fetch(`${API_BASE}${path}`, {
     ...init,
     headers,
@@ -78,6 +91,19 @@ export type CategoryCreate = {
 export type CategoryUpdate = Partial<CategoryCreate>;
 
 export const api = {
+  // Auth
+  async register(email: string, password: string): Promise<{ token: string }> {
+    return http('/auth/register', {
+      method: 'POST',
+      body: JSON.stringify({ email, password }),
+    });
+  },
+  async login(email: string, password: string): Promise<{ token: string }> {
+    return http('/auth/login', {
+      method: 'POST',
+      body: JSON.stringify({ email, password }),
+    });
+  },
   // Sem paginação: retorna lista simples de categorias. Para compatibilidade, há também o
   // utilitário toPage abaixo caso a tela precise de formato de página.
   listCategoriesSimple(params: { q?: string } = {}): Promise<Category[]> {

@@ -1,10 +1,13 @@
-import { NavLink, Route, Routes, useLocation } from 'react-router-dom';
+import { NavLink, Navigate, Route, Routes, useLocation } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { api, StockMovement } from './api';
 import CategoriesPage from './categories/CategoriesPage';
 import ProductsPage from './products/ProductsPage';
 import MovementsPage from './movements/MovementsPage';
 import FinancePage from './finance/FinancePage';
+import LoginPage from './auth/LoginPage';
+import RegisterPage from './auth/RegisterPage';
+import { useAuth } from './auth/AuthContext';
 // Reports estão temporariamente desativados
 
 function Dashboard() {
@@ -102,8 +105,31 @@ function Dashboard() {
 }
 
 export default function App() {
+  const { isAuthenticated, logout } = useAuth();
   const location = useLocation();
   const isActive = (path: string) => (location.pathname === path ? 'nav-item nav-item-active' : 'nav-item');
+  const isAuthRoute = location.pathname.startsWith('/login') || location.pathname.startsWith('/register');
+
+  function RequireAuth({ children }: { children: JSX.Element }) {
+    if (!isAuthenticated) {
+      return <Navigate to="/login" replace />;
+    }
+    return children;
+  }
+
+  if (isAuthRoute) {
+    // Página de login isolada, sem sidebar
+    return (
+      <div className="auth-page">
+        <Routes>
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/register" element={<RegisterPage />} />
+          <Route path="*" element={<Navigate to="/login" replace />} />
+        </Routes>
+      </div>
+    );
+  }
+
   return (
     <div className="app-shell">
       <aside className="sidebar">
@@ -121,27 +147,23 @@ export default function App() {
           <NavLink to="/categories" className={() => isActive('/categories')}>Categorias</NavLink>
           <NavLink to="/movements" className={() => isActive('/movements')}>Movimentacoes</NavLink>
           <NavLink to="/finance" className={() => isActive('/finance')}>Financeiro</NavLink>
-          {/* Removido temporariamente: Reports */}
         </nav>
 
         <section className="sidebar-card">
-          <p className="section-label">Status do projeto</p>
-          <h2>Versao inicial</h2>
-          <p>
-            Estrutura visual pronta para o primeiro ciclo. Backend e integracoes ficam para a proxima
-            etapa.
-          </p>
+          <p className="section-label">Sessao</p>
+          <button className="button button-logout" onClick={logout}>Sair</button>
         </section>
       </aside>
 
       <Routes>
-        <Route path="/" element={<Dashboard />} />
-        <Route path="/products" element={<ProductsPage />} />
-        <Route path="/categories" element={<CategoriesPage />} />
-        {/* Novas rotas */}
-        <Route path="/movements" element={<MovementsPage />} />
-        <Route path="/finance" element={<FinancePage />} />
-        {/* Rota de Reports removida temporariamente */}
+        <Route path="/" element={<RequireAuth><Dashboard /></RequireAuth>} />
+        <Route path="/products" element={<RequireAuth><ProductsPage /></RequireAuth>} />
+        <Route path="/categories" element={<RequireAuth><CategoriesPage /></RequireAuth>} />
+        <Route path="/movements" element={<RequireAuth><MovementsPage /></RequireAuth>} />
+        <Route path="/finance" element={<RequireAuth><FinancePage /></RequireAuth>} />
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="/register" element={<RegisterPage />} />
+        <Route path="*" element={<Navigate to={isAuthenticated ? '/' : '/login'} replace />} />
       </Routes>
     </div>
   );

@@ -13,7 +13,7 @@ import static com.stockflow.pac.category.CategoryDTOs.*;
 @RestController
 @RequestMapping("/api/categories")
 @CrossOrigin(
-        origins = {"http://localhost:5173"},
+        origins = {"http://localhost:5173", "http://127.0.0.1:5173", "http://192.168.1.126:5173"},
         methods = {RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT, RequestMethod.DELETE, RequestMethod.OPTIONS},
         allowedHeaders = {"*"}
 )
