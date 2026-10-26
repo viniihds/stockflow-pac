@@ -29,10 +29,14 @@ export type Page<T> = {
   size: number; // page size
 };
 
-// Detecta automaticamente o host do backend quando acessado via LAN (ex.: 192.168.x.x)
-// Caso VITE_API_BASE não esteja definida, usa o hostname atual na porta 8080.
-const API_BASE =
-  import.meta.env.VITE_API_BASE ?? `${window.location.protocol}//${window.location.hostname}:8080/api`;
+// Em produção (Vercel), defina VITE_API_BASE com a URL do backend incluindo "/api",
+// por exemplo: https://stockflow-api.onrender.com/api
+// Em desenvolvimento, se não estiver definida, detecta automaticamente o host do backend
+// (útil via LAN, ex.: 192.168.x.x) usando o hostname atual na porta 8080.
+// A barra final é removida para evitar URLs com "//" (que o Spring Security rejeita).
+const API_BASE = (
+  import.meta.env.VITE_API_BASE ?? `${window.location.protocol}//${window.location.hostname}:8080/api`
+).replace(/\/+$/, '');
 
 function getToken(): string | null {
   try {

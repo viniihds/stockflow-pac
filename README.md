@@ -191,3 +191,17 @@ Link do Jira: [StockFlow PAC - Backlog](https://stockflowpac.atlassian.net/jira/
 - expandir cadastro de produtos, categorias e movimentacoes
 - detalhar persistencia e validacoes
 - completar relatorios e financeiro
+
+
+## Deploy (gratuito: Neon + Render + Vercel)
+
+O passo a passo completo, com a lista de variaveis de ambiente de cada servico, esta em
+[`docs/DEPLOY.md`](docs/DEPLOY.md).
+
+Resumo: o banco PostgreSQL fica no **Neon**, o backend Spring Boot roda no **Render**
+(via `backend/Dockerfile`) e o frontend React e publicado na **Vercel**
+(`frontend/vercel.json` trata as rotas do React Router).
+
+Variaveis novas do backend: `POSTGRES_SSLMODE`, `JWT_SECRET` (obrigatoria em producao) e
+`CORS_ALLOWED_ORIGINS`. Variavel do frontend: `VITE_API_BASE` (URL do backend terminando em `/api`).
+Veja `backend/.env.example` e `frontend/.env.example`.

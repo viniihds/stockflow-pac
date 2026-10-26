@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect, useMemo, useState } from 'react';
+import React, { createContext, useContext, useMemo, useState } from 'react';
 
 type AuthState = {
   token: string | null;
@@ -10,14 +10,16 @@ type AuthState = {
 const Ctx = createContext<AuthState | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [token, setTokenState] = useState<string | null>(null);
-
-  useEffect(() => {
+  // Le o token ja na inicializacao (e nao em um useEffect): senão o primeiro render
+  // acontece sem token, o RequireAuth redireciona para /login e o usuario logado
+  // "perde" a pagina ao dar F5.
+  const [token, setTokenState] = useState<string | null>(() => {
     try {
-      const t = localStorage.getItem('sf_token');
-      if (t) setTokenState(t);
-    } catch {}
-  }, []);
+      return localStorage.getItem('sf_token');
+    } catch {
+      return null;
+    }
+  });
 
   const setToken = (t: string | null) => {
     setTokenState(t);
